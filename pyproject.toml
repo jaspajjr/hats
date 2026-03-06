@@ -1,0 +1,10 @@
+[project]
+name = "hats"
+version = "0.1.0"
+description = "Manage authentication context across clients and projects"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["typer"]
+
+[project.scripts]
+hats = "hats.main:main"
