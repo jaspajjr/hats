@@ -3,12 +3,17 @@ from typing import Optional
 import typer
 
 from hats import config as cfg
-from hats.tools import git
+from hats.tools import git, gcloud
 
 app = typer.Typer()
 
 
-def _parse_fields(git_name: Optional[str], git_email: Optional[str]) -> dict:
+def _parse_fields(
+    git_name: Optional[str],
+    git_email: Optional[str],
+    gcloud_account: Optional[str],
+    gcloud_project: Optional[str],
+) -> dict:
     data = {}
     if git_name is not None or git_email is not None:
         git_cfg = {}
@@ -17,6 +22,13 @@ def _parse_fields(git_name: Optional[str], git_email: Optional[str]) -> dict:
         if git_email is not None:
             git_cfg["email"] = git_email
         data["git"] = git_cfg
+    if gcloud_account is not None or gcloud_project is not None:
+        gcloud_cfg = {}
+        if gcloud_account is not None:
+            gcloud_cfg["account"] = gcloud_account
+        if gcloud_project is not None:
+            gcloud_cfg["project"] = gcloud_project
+        data["gcloud"] = gcloud_cfg
     return data
 
 
@@ -34,10 +46,18 @@ def list():
 
 @app.command()
 def status():
-    """Show current git identity."""
-    info = git.get_status()
-    typer.echo(f"name:  {info['name'] or '(not set)'}")
-    typer.echo(f"email: {info['email'] or '(not set)'}")
+    """Show current git identity and gcloud context."""
+    git_info = git.get_status()
+    typer.echo("git:")
+    typer.echo(f"  name:  {git_info['name'] or '(not set)'}")
+    typer.echo(f"  email: {git_info['email'] or '(not set)'}")
+    typer.echo("gcloud:")
+    try:
+        gcloud_info = gcloud.get_status()
+        typer.echo(f"  account: {gcloud_info['account'] or '(not set)'}")
+        typer.echo(f"  project: {gcloud_info['project'] or '(not set)'}")
+    except FileNotFoundError:
+        typer.echo("  (gcloud not installed)")
 
 
 @app.command()
@@ -50,13 +70,24 @@ def use(client: str):
         raise typer.Exit(1)
 
     git_cfg = client_cfg.get("git", {})
+    gcloud_cfg = client_cfg.get("gcloud", {})
+
+    if not git_cfg and not gcloud_cfg:
+        typer.echo(f"No config for client '{client}'.")
+        return
+
+    typer.echo(f"Switched to '{client}'.")
     if git_cfg:
         git.apply(git_cfg)
-        typer.echo(f"Switched to '{client}'.")
         typer.echo(f"  git name:  {git_cfg.get('name', '(unchanged)')}")
         typer.echo(f"  git email: {git_cfg.get('email', '(unchanged)')}")
-    else:
-        typer.echo(f"No git config for client '{client}'.")
+    if gcloud_cfg:
+        try:
+            gcloud.apply(gcloud_cfg)
+            typer.echo(f"  gcloud account: {gcloud_cfg.get('account', '(unchanged)')}")
+            typer.echo(f"  gcloud project: {gcloud_cfg.get('project', '(unchanged)')}")
+        except FileNotFoundError:
+            typer.echo("  gcloud: not installed — skipping", err=True)
 
 
 @app.command()
@@ -68,12 +99,17 @@ def show(client: str):
         typer.echo(str(e), err=True)
         raise typer.Exit(1)
     git_cfg = client_cfg.get("git", {})
+    gcloud_cfg = client_cfg.get("gcloud", {})
     typer.echo(f"[{client}]")
+    if not git_cfg and not gcloud_cfg:
+        typer.echo("  (no settings)")
+        return
     if git_cfg:
         typer.echo(f"  git name:  {git_cfg.get('name', '(not set)')}")
         typer.echo(f"  git email: {git_cfg.get('email', '(not set)')}")
-    else:
-        typer.echo("  (no settings)")
+    if gcloud_cfg:
+        typer.echo(f"  gcloud account: {gcloud_cfg.get('account', '(not set)')}")
+        typer.echo(f"  gcloud project: {gcloud_cfg.get('project', '(not set)')}")
 
 
 @app.command()
@@ -81,9 +117,11 @@ def create(
     client: str,
     git_name: Optional[str] = typer.Option(None, "--git-name", help="Git user.name"),
     git_email: Optional[str] = typer.Option(None, "--git-email", help="Git user.email"),
+    gcloud_account: Optional[str] = typer.Option(None, "--gcloud-account", help="gcloud active account"),
+    gcloud_project: Optional[str] = typer.Option(None, "--gcloud-project", help="gcloud active project"),
 ):
     """Create a new client context."""
-    data = _parse_fields(git_name, git_email)
+    data = _parse_fields(git_name, git_email, gcloud_account, gcloud_project)
     try:
         cfg.create_client(client, data)
     except KeyError as e:
@@ -97,9 +135,11 @@ def update(
     client: str,
     git_name: Optional[str] = typer.Option(None, "--git-name", help="Git user.name"),
     git_email: Optional[str] = typer.Option(None, "--git-email", help="Git user.email"),
+    gcloud_account: Optional[str] = typer.Option(None, "--gcloud-account", help="gcloud active account"),
+    gcloud_project: Optional[str] = typer.Option(None, "--gcloud-project", help="gcloud active project"),
 ):
     """Update an existing client context (replaces its settings)."""
-    data = _parse_fields(git_name, git_email)
+    data = _parse_fields(git_name, git_email, gcloud_account, gcloud_project)
     try:
         cfg.update_client(client, data)
     except KeyError as e:

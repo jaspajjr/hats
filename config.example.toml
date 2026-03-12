@@ -1,0 +1,24 @@
+# Example hats config — copy to ~/.config/hats/config.toml and edit as needed.
+
+[clients.personal]
+[clients.personal.git]
+name = "Jane Smith"
+email = "jane@personal.example.com"
+
+[clients.acme]
+[clients.acme.git]
+name = "Jane Smith"
+email = "jane@acme.example.com"
+
+[clients.acme.gcloud]
+account = "jane@acme.example.com"
+project = "acme-prod-123"
+
+[clients.widgets-inc]
+[clients.widgets-inc.git]
+name = "Jane Smith"
+email = "jane@widgets-inc.example.com"
+
+[clients.widgets-inc.gcloud]
+account = "jane@widgets-inc.example.com"
+project = "widgets-staging-456"
