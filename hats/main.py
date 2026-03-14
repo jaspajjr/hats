@@ -83,6 +83,16 @@ def create(
     git_email: Optional[str] = typer.Option(None, "--git-email", help="Git user.email"),
 ):
     """Create a new client context."""
+    # Interactive prompts when flags not provided
+    if git_name is None:
+        git_name = typer.prompt("Git user name", default="")
+        if not git_name:
+            git_name = None
+    if git_email is None:
+        git_email = typer.prompt("Git user email", default="")
+        if not git_email:
+            git_email = None
+
     data = _parse_fields(git_name, git_email)
     try:
         cfg.create_client(client, data)
@@ -99,6 +109,25 @@ def update(
     git_email: Optional[str] = typer.Option(None, "--git-email", help="Git user.email"),
 ):
     """Update an existing client context (replaces its settings)."""
+    # Interactive prompts when flags not provided
+    # Show current values as defaults
+    try:
+        current_cfg = cfg.get_client(client)
+        current_git = current_cfg.get("git", {})
+    except KeyError:
+        current_git = {}
+
+    if git_name is None:
+        current_name = current_git.get("name", "")
+        git_name = typer.prompt("Git user name", default=current_name)
+        if not git_name:
+            git_name = None
+    if git_email is None:
+        current_email = current_git.get("email", "")
+        git_email = typer.prompt("Git user email", default=current_email)
+        if not git_email:
+            git_email = None
+
     data = _parse_fields(git_name, git_email)
     try:
         cfg.update_client(client, data)
