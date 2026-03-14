@@ -45,11 +45,39 @@ email = "jane@personal.dev"
 
 ## Requirements
 
+### Rust Version (Recommended)
+- Rust toolchain (for building)
+- `git` installed and on `PATH`
+- `gcloud` and `aws` CLIs (when those integrations are added)
+
+### Python Version
 - Python >= 3.13
 - `git` installed and on `PATH`
 - `gcloud` and `aws` CLIs (when those integrations are added)
 
-## Setup
+## Installation
+
+### Option 1: Rust Binary (Recommended)
+
+Build a standalone binary with no runtime dependencies:
+
+```bash
+# Install Rust (if not already installed)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+
+# Build the binary
+cargo build --release
+
+# Install to your PATH
+sudo cp target/release/hats /usr/local/bin/
+# Or for user-only install:
+cp target/release/hats ~/.local/bin/
+```
+
+The resulting binary is ~1.9MB and has zero dependencies.
+
+### Option 2: Python Development Setup
 
 ```bash
 python -m venv .venv
