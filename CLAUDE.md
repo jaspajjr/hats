@@ -6,35 +6,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `hats` is a CLI tool for switching authentication context (git identity, gcloud account/project, AWS profile) between named client/project configurations. See README.md for the intended command interface.
 
-The package name is `hats`. Module structure:
-- `hats/main.py` — CLI entrypoint (typer app), entrypoint `hats.main:main` registered in `pyproject.toml`
-- `hats/config.py` — config loading from `~/.config/hats/config.toml`
-- `hats/tools/git.py` — git identity management
+Written in Rust. Module structure:
+- `src/main.rs` — CLI entrypoint and command handlers (clap)
+- `src/config.rs` — config loading/saving from `~/.config/hats/config.toml`
+- `src/git.rs` — git identity management
 
 **Current implementation status:** git is implemented. gcloud and aws are planned but not yet built.
 
 ## Setup
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+cargo build
 ```
 
-Python 3.13 is required (see `.python-version`).
-
 ## Running
+
+```bash
+cargo run -- status
+cargo run -- list
+cargo run -- use <client>
+```
+
+Or after installing the binary:
 
 ```bash
 hats status
 hats list
 hats use <client>
-```
-
-Or during development before installing:
-
-```bash
-python -m hats.main
 ```
 
 ## Configuration
@@ -50,5 +48,4 @@ Client contexts are stored in `~/.config/hats/config.toml`. Each context defines
 ## Notes
 
 - `hats status` currently shows git identity only; it will expand as gcloud/aws are added.
-- The CLI framework is `typer`. Config format is TOML with a `[clients.<name>]` structure.
-- The README references `~/.config/local-tool-management/config.toml` — the actual path used in code is `~/.config/hats/config.toml`.
+- The CLI framework is `clap` with derive macros. Config format is TOML with a `[clients.<name>]` structure.

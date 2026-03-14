@@ -25,6 +25,16 @@ hats use <client>
 
 # List configured client contexts
 hats list
+
+# Show config for a specific client
+hats show <client>
+
+# Create or update a client context
+hats create <client>
+hats update <client>
+
+# Delete a client context
+hats delete <client>
 ```
 
 ## Configuration
@@ -45,14 +55,24 @@ email = "jane@personal.dev"
 
 ## Requirements
 
-- Python >= 3.13
+- Rust toolchain (for building)
 - `git` installed and on `PATH`
 - `gcloud` and `aws` CLIs (when those integrations are added)
 
-## Setup
+## Installation
+
+Build a standalone binary with no runtime dependencies:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+# Install Rust (if not already installed)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+
+# Build the binary
+cargo build --release
+
+# Install to your PATH
+cp target/release/hats ~/.local/bin/
 ```
+
+The resulting binary is ~1.9MB and has zero runtime dependencies.
