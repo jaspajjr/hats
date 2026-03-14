@@ -25,6 +25,16 @@ hats use <client>
 
 # List configured client contexts
 hats list
+
+# Show config for a specific client
+hats show <client>
+
+# Create or update a client context
+hats create <client>
+hats update <client>
+
+# Delete a client context
+hats delete <client>
 ```
 
 ## Configuration
@@ -45,19 +55,11 @@ email = "jane@personal.dev"
 
 ## Requirements
 
-### Rust Version (Recommended)
 - Rust toolchain (for building)
 - `git` installed and on `PATH`
 - `gcloud` and `aws` CLIs (when those integrations are added)
 
-### Python Version
-- Python >= 3.13
-- `git` installed and on `PATH`
-- `gcloud` and `aws` CLIs (when those integrations are added)
-
 ## Installation
-
-### Option 1: Rust Binary (Recommended)
 
 Build a standalone binary with no runtime dependencies:
 
@@ -70,17 +72,7 @@ source "$HOME/.cargo/env"
 cargo build --release
 
 # Install to your PATH
-sudo cp target/release/hats /usr/local/bin/
-# Or for user-only install:
 cp target/release/hats ~/.local/bin/
 ```
 
-The resulting binary is ~1.9MB and has zero dependencies.
-
-### Option 2: Python Development Setup
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
-```
+The resulting binary is ~1.9MB and has zero runtime dependencies.
